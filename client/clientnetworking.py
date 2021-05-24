@@ -15,16 +15,10 @@ class clientRequest:
             raise "player y position needs to be passed as a string"
 
         self.adress = adress + "clientupdate"
-        self.balladress = adress + "ballpost"
+        self.connectadress = adress + "connect"
         self.headers = {
             "player": player,
             "posy": posy,
-        }
-        self.ballheaders = {
-            "ballx": 500,
-            "bally": 300,
-            "ballvelx": 10,
-            "ballvely": 10,
         }
         self.data = (
             "game client request :)"  # TODO remove this for more efficient request?
@@ -35,11 +29,9 @@ class clientRequest:
         self.headers["posy"] = str(posy)
         return str(req.post(self.adress, headers=self.headers, data=self.data).content)
 
-    def postBall(self, ballx, bally, ballvelx, ballvely):
-        self.ballheaders["ballx"] = str(ballx)
-        self.ballheaders["bally"] = str(bally)
-        self.ballheaders["ballvelx"] = str(ballvelx)
-        self.ballheaders["ballvely"] = str(ballvely)
+    def connect(self, username):  # TODO matchmaking system
         return str(
-            req.post(self.balladress, headers=self.ballheaders, data=self.data).content
+            req.post(
+                self.connectadress, headers="", data="client wants to connect :)"
+            ).content
         )

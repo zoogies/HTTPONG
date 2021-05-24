@@ -3,17 +3,20 @@ import pygame
 import time
 import random
 
+# username = input("Please type a username: ")
 pygame.init()
 screen = pygame.display.set_mode((1000, 600))
+pygame.display.set_caption("HTTPONG")
+font = pygame.font.Font("freesansbold.ttf", 32)
 clock = pygame.time.Clock()
-# playerID = input("which player are you? 1 or 2: ")
-playerID = "1"
+playerID = input("which player are you? 1 or 2: ")
+# playerID = "1"
 posY = 300
 color = (255, 255, 255)
 paddleWidth = 5
 paddleHeight = 5
 otherPlayerY = 300
-networkingInterface = clientRequest("http://127.0.0.1:8000/", playerID, str(posY))
+networkingInterface = clientRequest("http://192.168.86.55:7676/", playerID, str(posY))
 
 
 def game_loop():
@@ -54,51 +57,76 @@ def game_loop():
             otherPlayerY = requestData[0].strip("b'")
             ballX = int(requestData[1])
             ballY = int(requestData[2])
-            ballVelX = requestData[3]
-            ballVelY = requestData[4].strip("'")
+            p1score = requestData[3]
+            p2score = requestData[4].strip("'")
 
             # ==============================================================================
             # posY = random.randint(0, 600)
             # draw our player on the screen
-            pygame.draw.rect(
-                screen,
-                color,
-                pygame.Rect(
-                    0,
-                    posY + 50,
-                    paddleWidth,
-                    100,
-                ),
-            )
-            # draw our enemy on the screen
-            pygame.draw.rect(
-                screen,
-                color,
-                pygame.Rect(
-                    995,
-                    int(otherPlayerY) + 50,
-                    paddleWidth,
-                    100,
-                ),
-            )
-            pygame.draw.circle(screen, color, (ballX, ballY), 5)
-            # ==============================================================================
-            if playerID == "1":
-                ballX += int(ballVelX)
-                ballY += int(ballVelY)
+            if playerID == "1":  # if player 1
+                pygame.draw.rect(
+                    screen,
+                    color,
+                    pygame.Rect(
+                        0,
+                        int(posY) - 50,
+                        paddleWidth,
+                        100,
+                    ),
+                )
             else:
-                ballX += ballVelX
-                ballY += ballVelY
+                pygame.draw.rect(
+                    screen,
+                    color,
+                    pygame.Rect(
+                        995,
+                        int(posY) - 50,
+                        paddleWidth,
+                        100,
+                    ),
+                )
 
-            networkingInterface.postBall(ballX, ballY, ballVelX, ballVelY)
+            # draw our enemy on the screen
+            if playerID == "1":
+                pygame.draw.rect(
+                    screen,
+                    color,
+                    pygame.Rect(
+                        995,
+                        int(otherPlayerY) - 50,
+                        paddleWidth,
+                        100,
+                    ),
+                )
+            else:
+                pygame.draw.rect(
+                    screen,
+                    color,
+                    pygame.Rect(
+                        0,
+                        int(otherPlayerY) - 50,
+                        paddleWidth,
+                        100,
+                    ),
+                )
+            pygame.draw.circle(screen, color, (int(ballX), int(ballY)), 5)
+            # ==============================================================================
+
+            # render our current score to the screen
+            text = font.render(p1score + " to " + p2score, True, color)
+            textRect = text.get_rect()
+            textRect.center = (500, 300)
+            screen.blit(text, textRect)
+
             # ==============================================================================
 
             pygame.display.flip()
             clock.tick(30)
             time.sleep(0.1)
-        except:
-            print("server probably timed out D:")
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":
+    # networkingInterface.connect(username) TODO
     game_loop()

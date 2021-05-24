@@ -5,15 +5,16 @@ p1y = 0
 p2y = 0
 ballx = 500
 bally = 300
-ballvelx = 1
-ballvely = 1
-
+ballvelx = 10
+ballvely = 10
+p1points = 0
+p2points = 0
 # define server post defualts
 normalpost = "HTTP/1.0 200 OK\n\n"
 
 # Define socket host and port
-SERVER_HOST = "127.0.0.1"
-SERVER_PORT = 8000
+SERVER_HOST = "192.168.86.55"
+SERVER_PORT = 7676
 
 # Create socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,6 +42,36 @@ while True:
             currentPlayer = headers[6].split()[1]
             currentPlayerY = headers[7].split()[1]
 
+            # update ball position this frame
+            ballx += ballvelx
+            bally += ballvely
+
+            # fix shit TODO fix this lol
+            p1y = int(p1y)
+            p2y = int(p2y)
+
+            # preform checks on ball
+            if bally >= 600:  # if ball under screen
+                ballvely = -ballvely
+            elif bally <= 0:
+                ballvely = -ballvely
+
+            if ballx >= 1000:
+                if bally >= p2y - 50 and bally <= p2y + 50:
+                    ballvelx = -ballvelx
+                else:
+                    p1points += 1
+                    ballx = 500
+                    bally = 300
+
+            elif ballx <= 0:
+                if bally >= p1y - 50 and bally <= p1y + 50:
+                    ballvelx = -ballvelx
+                else:
+                    p2points += 1
+                    ballx = 500
+                    bally = 300
+
             # update our game values from our post requests
             # if the request comes from p1 send p2s data and the ball data
             if currentPlayer == "1":
@@ -53,9 +84,9 @@ while True:
                     + " "
                     + str(bally)
                     + " "
-                    + str(ballvelx)
+                    + str(p1points)
                     + " "
-                    + str(ballvely)
+                    + str(p2points)
                 )
             # if the request comes from p2 send p1s data and the ball data
             elif currentPlayer == "2":
@@ -68,34 +99,17 @@ while True:
                     + " "
                     + str(bally)
                     + " "
-                    + str(ballvelx)
+                    + str(p1points)
                     + " "
-                    + str(ballvely)
+                    + str(p2points)
                 )
-        elif filename == "/ballpost":
-            print("RECIEVED:", filename)
-            tballx = headers[7].split()[1]
-            tbally = headers[8].split()[1]
-            tballvelx = headers[9].split()[1]
-            tballvely = headers[10].split()[1]
-            if not tballx == ballx:
-                ballx = tballx
-            if not tbally == bally:
-                bally = tbally
-            if not tballvelx == ballvelx:
-                ballvelx = tballvelx
-            if not tballvely == ballvely:
-                ballvely = tballvely
-
-            print("ballx", ballx)
-            print("bally", bally)
-            print("ballvelx", ballvelx)
-            print("ballvely", ballvely)
+        ##elif filename == "/clientconnect": TODO matchmaking system
 
         else:
             response = "HTTP/1.0 400 NOT FOUND\n\nInvalid Page Request"
-    except:
+    except Exception as e:
         response = "HTTP/1.0 403 NOT FOUND\n\nServer Error :("
+        print(e)
 
     print("RESPONDED:", response)
 

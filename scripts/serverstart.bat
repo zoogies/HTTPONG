@@ -1,2 +1,2 @@
- cd C:\Users\swoos\Documents\GitHub\messingWithServers\server
+ cd C:\Users\swoos\Documents\GitHub\PygamePongServer\server
  python server.py
